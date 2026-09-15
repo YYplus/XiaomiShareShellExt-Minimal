@@ -24,7 +24,8 @@ jobs:
       - name: Expand source
         shell: pwsh
         run: |
-          Expand-Archive -Path source.zip -DestinationPath source -Force
+          New-Item -ItemType Directory -Path source -Force | Out-Null
+          tar -xf source.zip -C source
 
       - name: Build minimal Xiaomi Share shell extension
         shell: pwsh
