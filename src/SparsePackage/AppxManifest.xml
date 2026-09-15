@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
+  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
+  IgnorableNamespaces="uap uap10 rescap com desktop4 desktop5">
+
+  <Identity
+    Name="XiaomiShareShellExt.Minimal"
+    Publisher="CN=XiaomiShareShellExt"
+    Version="1.0.1.0"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>小米互传右键扩展</DisplayName>
+    <PublisherDisplayName>Local</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <uap10:AllowExternalContent>true</uap10:AllowExternalContent>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22000.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="zh-CN" />
+  </Resources>
+
+  <Applications>
+    <Application
+      Id="XiaomiShare"
+      Executable="XiaomiShare.Helper\XiaomiShare.Helper.exe"
+      uap10:TrustLevel="mediumIL"
+      uap10:RuntimeBehavior="win32App">
+
+      <uap:VisualElements
+        DisplayName="小米互传右键扩展"
+        Description="仅为 Windows 11 一级右键菜单提供“使用小米互传发送”"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        AppListEntry="none" />
+
+      <Extensions>
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:SurrogateServer DisplayName="Xiaomi Share Shell Extension">
+              <com:Class
+                Id="E5DB1D6B-2057-4EFD-B087-EF638D07C6AF"
+                Path="XiaomiShare.ShellExt\XiaomiShare.ShellExt.dll"
+                ThreadingModel="STA" />
+            </com:SurrogateServer>
+          </com:ComServer>
+        </com:Extension>
+
+        <desktop4:Extension Category="windows.fileExplorerContextMenus">
+          <desktop4:FileExplorerContextMenus>
+            <desktop4:ItemType Type="*">
+              <desktop4:Verb Id="XiaomiShareSend" Clsid="E5DB1D6B-2057-4EFD-B087-EF638D07C6AF" />
+            </desktop4:ItemType>
+            <desktop5:ItemType Type="Directory">
+              <desktop5:Verb Id="XiaomiShareSendDirectory" Clsid="E5DB1D6B-2057-4EFD-B087-EF638D07C6AF" />
+            </desktop5:ItemType>
+          </desktop4:FileExplorerContextMenus>
+        </desktop4:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="unvirtualizedResources" />
+  </Capabilities>
+</Package>

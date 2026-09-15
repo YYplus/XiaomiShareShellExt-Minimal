@@ -2,9 +2,7 @@
 
 一个仅实现 **Windows 11 一级右键菜单 →「使用小米互传发送」** 的最小版本。
 
-> Build target: Windows 11 x64.
-
-基于 `cnbluefire/MiDropShellExtForWindows11` 的小米互传调用方式裁剪，并保留其对新版 `MiPcContinuity.exe` 的兼容逻辑。
+基于 `cnbluefire/MiDropShellExtForWindows11` 的小米互传调用方式裁剪，并保留其对新版小米互联服务的兼容逻辑。
 
 ## 只包含什么
 
@@ -36,10 +34,12 @@ Windows 11 的现代一级 File Explorer 右键菜单使用 `IExplorerCommand`�
 
 系统中仍会存在名为 `XiaomiShareShellExt.Minimal` 的 package identity。这一点无法在使用微软支持的 Win11 一级菜单机制时彻底去掉。
 
+清单只显式声明 sparse/external-location 模式所需的 `runFullTrust` 与 `unvirtualizedResources`。`Get-AppxPackage` 可能另外显示 `internetClient`、`wifiData`、`cellularData`、`uniqueAppPackageCapability` 等系统派生 capability；它们不是本项目清单中额外申请的权限。
+
 ## 结构
 
 ```text
-XiaomiShareShellExt.Minimal        <- sparse package identity（仅注册）
+XiaomiShareShellExt.Minimal
         |
         +-- IExplorerCommand / COM
                 |
@@ -74,16 +74,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 .\Build.ps1
 ```
 
-`Build.ps1` 会：
-
-1. NativeAOT 编译 `XiaomiShare.ShellExt.dll`；
-2. NativeAOT 编译一次性 `XiaomiShare.Helper.exe`；
-3. 用 Windows SDK 生成非常小的 sparse identity MSIX；
-4. 创建仅用于本机安装的临时自签名代码签名证书；
-5. 签名 identity MSIX；
-6. 删除私钥，只保留安装需要的公开 `.cer`。
-
-生成结果位于 `dist`。
+`Build.ps1` 会：NativeAOT 编译 Shell DLL 和一次性 helper、生成 sparse identity MSIX、创建临时自签名代码签名证书、签名 MSIX，并删除构建时私钥，只保留安装所需的公开 `.cer`。
 
 ## 安装
 
@@ -93,19 +84,15 @@ Set-ExecutionPolicy -Scope Process Bypass
 .\Install.ps1
 ```
 
+安装脚本会在需要时自动请求管理员权限（UAC），仅用于把本地 MSIX 的公开签名证书加入 `LocalMachine\TrustedPeople`。不需要开启 Windows 开发者模式。
+
 默认普通程序文件安装到：
 
 ```text
 %LOCALAPPDATA%\Programs\XiaomiShareShellExt
 ```
 
-然后通过：
-
-```powershell
-Add-AppxPackage -ExternalLocation ...
-```
-
-注册 sparse package identity。
+然后通过 `Add-AppxPackage -ExternalLocation ...` 注册 sparse package identity。
 
 如果安装后一级右键菜单没有立刻刷新，重启 Explorer 或注销再登录即可。
 
@@ -115,19 +102,17 @@ Add-AppxPackage -ExternalLocation ...
 .\Uninstall.ps1
 ```
 
-脚本会注销 package identity、删除本项目文件和缓存，并移除构建时导入到当前用户 `TrustedPeople` 的本地公开证书。
+脚本会注销 package identity、删除本项目文件和缓存，并移除安装时导入到本地计算机 `TrustedPeople` 的公开证书。卸载脚本同样会在需要时请求管理员权限。
 
 ## 与原项目相比的关键裁剪
 
 原项目后续版本包含/曾包含：Windows Share Target、开始菜单占位入口，以及华为/荣耀分享支持。本版本均移除，只留下小米互传一级右键菜单路径。
 
-同时保留当前上游与新版小米互联服务相关的兼容逻辑：支持 `hyperConnect.exe`、`XiaomiPcManager.exe` 和 `MiPcContinuity.exe`，并同时识别 `XiaomiPCManager` 与 `MiPcContinuity` 消息窗口。
+同时保留当前上游与新版小米互联服务相关的兼容逻辑：优先识别 `hyperConnect.exe`，其次识别 `XiaomiPcManager.exe` 和 `MiPcContinuity.exe`；对于 5.x 将 COM DLL 注册在 `native-interconnect` 子目录中的情况，会向上定位 `hyperConnect.exe`。消息窗口同时识别 `XiaomiPCManager` 和 `MiPcContinuity`。
 
 ## GitHub Actions 构建
 
-如果不想在本机安装 Visual Studio/Windows SDK，可以把源码放到 GitHub 仓库，在 **Actions → Build Windows package → Run workflow** 手动构建。
-
-构建完成后下载 `XiaomiShareShellExt-Minimal-win-x64` artifact，解压后运行 `Install.ps1` 即可。工作流使用 GitHub 的 Windows runner 完成 NativeAOT、sparse identity MSIX 与本地签名证书的生成。
+Actions 直接从仓库中的 `src/` 构建，不再使用中间 `source.b64` 或 `source.zip`。构建完成后下载 `XiaomiShareShellExt-Minimal-win-x64` artifact，解压后运行 `Install.ps1` 即可。
 
 ## 上游与许可
 
