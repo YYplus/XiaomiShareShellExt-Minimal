@@ -1,0 +1,47 @@
+name: Build Windows package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Expand source
+        shell: pwsh
+        run: |
+          Expand-Archive -Path source.zip -DestinationPath source -Force
+
+      - name: Build minimal Xiaomi Share shell extension
+        shell: pwsh
+        working-directory: source/XiaomiShareShellExt-Minimal
+        run: .\Build.ps1
+
+      - name: Stage install bundle
+        shell: pwsh
+        working-directory: source/XiaomiShareShellExt-Minimal
+        run: |
+          New-Item -ItemType Directory -Path artifact -Force | Out-Null
+          Copy-Item dist artifact\dist -Recurse
+          Copy-Item Install.ps1,Uninstall.ps1,README.md,LICENSE,NOTICE.md artifact\
+
+      - name: Upload install bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: XiaomiShareShellExt-Minimal-win-x64
+          path: source/XiaomiShareShellExt-Minimal/artifact
+          if-no-files-found: error
