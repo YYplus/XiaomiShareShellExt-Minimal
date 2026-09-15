@@ -45,7 +45,9 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path artifact -Force | Out-Null
           Copy-Item dist artifact\dist -Recurse
-          Copy-Item Install.ps1,Uninstall.ps1,README.md,LICENSE,NOTICE.md artifact\
+          Copy-Item README.md,LICENSE,NOTICE.md artifact\
+          Copy-Item ..\..\installer\Install.ps1 artifact\Install.ps1 -Force
+          Copy-Item ..\..\installer\Uninstall.ps1 artifact\Uninstall.ps1 -Force
 
       - name: Upload install bundle
         uses: actions/upload-artifact@v4
