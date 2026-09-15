@@ -2,8 +2,6 @@ name: Build Windows package
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 
 permissions:
   contents: read
@@ -21,20 +19,12 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Expand source
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Path source -Force | Out-Null
-          tar -xf source.zip -C source
-
       - name: Build minimal Xiaomi Share shell extension
         shell: pwsh
-        working-directory: source/XiaomiShareShellExt-Minimal
         run: .\Build.ps1
 
       - name: Stage install bundle
         shell: pwsh
-        working-directory: source/XiaomiShareShellExt-Minimal
         run: |
           New-Item -ItemType Directory -Path artifact -Force | Out-Null
           Copy-Item dist artifact\dist -Recurse
@@ -44,5 +34,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: XiaomiShareShellExt-Minimal-win-x64
-          path: source/XiaomiShareShellExt-Minimal/artifact
+          path: artifact
           if-no-files-found: error
