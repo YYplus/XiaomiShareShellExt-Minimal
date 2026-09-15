@@ -2,6 +2,8 @@
 
 一个仅实现 **Windows 11 一级右键菜单 →「使用小米互传发送」** 的最小版本。
 
+> Build target: Windows 11 x64.
+
 基于 `cnbluefire/MiDropShellExtForWindows11` 的小米互传调用方式裁剪，并保留其对新版 `MiPcContinuity.exe` 的兼容逻辑。
 
 ## 只包含什么
