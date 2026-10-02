@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [string]$Configuration = "Release"
+    [string]$Configuration = "Release",
+    [string]$TimestampUrl = "http://timestamp.digicert.com"
 )
 
 $ErrorActionPreference = "Stop"
@@ -74,9 +75,13 @@ try {
     Export-Certificate -Cert $cert -FilePath $CerPath | Out-Null
     Set-Content -Path (Join-Path $Dist "certificate-thumbprint.txt") -Value $cert.Thumbprint -NoNewline
 
-    Write-Host "[5/5] Signing sparse identity package..."
-    & $SignTool sign /fd SHA256 /f $PfxPath /p $passwordPlain $IdentityMsix
+    Write-Host "[5/5] Signing and timestamping sparse identity package..."
+    & $SignTool sign /fd SHA256 /f $PfxPath /p $passwordPlain /tr $TimestampUrl /td SHA256 $IdentityMsix
     if ($LASTEXITCODE -ne 0) { throw "SignTool failed." }
+
+    Write-Host "Verifying package signature and timestamp..."
+    & $SignTool verify /pa /v /tw $IdentityMsix
+    if ($LASTEXITCODE -ne 0) { throw "SignTool verification failed." }
 }
 finally {
     Remove-Item $PfxPath -Force -ErrorAction SilentlyContinue
