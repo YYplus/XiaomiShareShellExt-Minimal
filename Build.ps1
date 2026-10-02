@@ -80,9 +80,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "SignTool failed." }
 
     Write-Host "Verifying package signature and timestamp..."
-    $verifyStorePath = "Cert:\CurrentUser\TrustedPeople\$($cert.Thumbprint)"
+    $verifyStorePath = "Cert:\LocalMachine\TrustedPeople\$($cert.Thumbprint)"
     try {
-        Import-Certificate -FilePath $CerPath -CertStoreLocation "Cert:\CurrentUser\TrustedPeople" | Out-Null
+        Import-Certificate -FilePath $CerPath -CertStoreLocation "Cert:\LocalMachine\TrustedPeople" | Out-Null
         & $SignTool verify /pa /v /tw $IdentityMsix
         if ($LASTEXITCODE -ne 0) { throw "SignTool verification failed." }
     }
