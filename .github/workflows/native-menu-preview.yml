@@ -1,0 +1,32 @@
+name: Build vendor native menu preview
+
+on:
+  push:
+    branches: [ "experiment/vendor-native-menu-6" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-preview:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and sign sparse preview identity
+        shell: pwsh
+        run: ./native-preview/Build-Preview.ps1
+      - name: Stage installation bundle
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path native-preview-bundle -Force | Out-Null
+          Copy-Item native-preview/dist/XiaomiShareNativeMenu.Preview.msix native-preview-bundle/
+          Copy-Item native-preview/dist/XiaomiShareNativeMenu.Preview.cer native-preview-bundle/
+          Copy-Item native-preview/Install-Preview.ps1 native-preview-bundle/
+          Copy-Item native-preview/Uninstall-Preview.ps1 native-preview-bundle/
+          Copy-Item native-preview/README.md native-preview-bundle/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: XiaomiShareNativeMenu-Preview
+          path: native-preview-bundle/
+          if-no-files-found: error
