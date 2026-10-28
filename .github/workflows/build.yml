@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -20,6 +22,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
+
+      - name: Check Xiaomi executable lookup across supported layouts
+        shell: pwsh
+        run: dotnet run --project tests/XiaomiShare.PathTests/XiaomiShare.PathTests.csproj -c Release
 
       - name: Build minimal Xiaomi Share shell extension
         shell: pwsh
