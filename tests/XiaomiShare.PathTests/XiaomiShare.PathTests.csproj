@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/XiaomiShare.Core/XiaomiPcManagerHelper.cs" Link="XiaomiPcManagerHelper.cs" />
+    <Compile Include="../../src/XiaomiShare.Core/FilesHelper.cs" Link="FilesHelper.cs" />
+  </ItemGroup>
+</Project>
