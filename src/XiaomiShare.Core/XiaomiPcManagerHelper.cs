@@ -28,19 +28,28 @@ public static class XiaomiPcManagerHelper
                 //   HyperConnect/<version>/resources/native-interconnect/win32/...
                 // Resolve the product directory by finding an actual executable,
                 // rather than assuming the DLL directory is the install root.
-                var folder = Path.GetDirectoryName(path);
-                while (!string.IsNullOrEmpty(folder))
-                {
-                    if (File.Exists(Path.Combine(folder, "hyperConnect.exe")) ||
-                        File.Exists(Path.Combine(folder, "XiaomiPcManager.exe")) ||
-                        File.Exists(Path.Combine(folder, "MiPcContinuity.exe")))
-                        return folder;
-
-                    folder = Path.GetDirectoryName(folder);
-                }
+                var folder = FindInstallDirectory(Path.GetDirectoryName(path));
+                if (!string.IsNullOrEmpty(folder)) return folder;
             }
         }
         catch { }
+
+        return string.Empty;
+    }
+
+    // Walk up from the registered COM DLL directory until the actual
+    // product executable is found. The directory layout varies by version.
+    internal static string FindInstallDirectory(string? folder)
+    {
+        while (!string.IsNullOrEmpty(folder))
+        {
+            if (File.Exists(Path.Combine(folder, "hyperConnect.exe")) ||
+                File.Exists(Path.Combine(folder, "XiaomiPcManager.exe")) ||
+                File.Exists(Path.Combine(folder, "MiPcContinuity.exe")))
+                return folder;
+
+            folder = Path.GetDirectoryName(folder);
+        }
 
         return string.Empty;
     }
