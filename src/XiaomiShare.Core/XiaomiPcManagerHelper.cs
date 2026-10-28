@@ -23,17 +23,21 @@ public static class XiaomiPcManagerHelper
                 if (subKey?.GetValue(null) is not string path || string.IsNullOrWhiteSpace(path))
                     continue;
 
+                // The COM server can live under a versioned subdirectory:
+                //   XiaomiPCManager/6.0.0.39/MiSmartShare/MiDropShellExt.dll
+                //   HyperConnect/<version>/resources/native-interconnect/win32/...
+                // Resolve the product directory by finding an actual executable,
+                // rather than assuming the DLL directory is the install root.
                 var folder = Path.GetDirectoryName(path);
-                if (folder?.Contains("\\native-interconnect\\", StringComparison.OrdinalIgnoreCase) is true)
+                while (!string.IsNullOrEmpty(folder))
                 {
-                    while (!string.IsNullOrEmpty(folder))
-                    {
-                        if (File.Exists(Path.Combine(folder, "hyperConnect.exe"))) break;
-                        folder = Path.GetDirectoryName(folder);
-                    }
-                }
+                    if (File.Exists(Path.Combine(folder, "hyperConnect.exe")) ||
+                        File.Exists(Path.Combine(folder, "XiaomiPcManager.exe")) ||
+                        File.Exists(Path.Combine(folder, "MiPcContinuity.exe")))
+                        return folder;
 
-                if (Directory.Exists(folder)) return folder;
+                    folder = Path.GetDirectoryName(folder);
+                }
             }
         }
         catch { }
