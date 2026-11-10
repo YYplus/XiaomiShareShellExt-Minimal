@@ -108,7 +108,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 原项目后续版本包含/曾包含：Windows Share Target、开始菜单占位入口，以及华为/荣耀分享支持。本版本均移除，只留下小米互传一级右键菜单路径。
 
-同时保留当前上游与新版小米互联服务相关的兼容逻辑：优先识别 `hyperConnect.exe`，其次识别 `XiaomiPcManager.exe` 和 `MiPcContinuity.exe`；对于 5.x 将 COM DLL 注册在 `native-interconnect` 子目录中的情况，会向上定位 `hyperConnect.exe`。消息窗口同时识别 `XiaomiPCManager` 和 `MiPcContinuity`。
+同时保留当前上游与新版小米互联服务相关的兼容逻辑：优先识别 `hyperConnect.exe`，其次识别 `XiaomiPcManager.exe` 和 `MiPcContinuity.exe`。无论 COM DLL 位于版本根目录、旧版的 `native-interconnect` 子目录，还是小米电脑管家 6.0.0.39 的 `MiSmartShare` 子目录，都会逐级向上寻找实际存在的主程序，而不会把 DLL 所在的子目录误认为安装根目录。消息窗口仍识别 `XiaomiPCManager` 和 `MiPcContinuity`；6.0.0.39 的实际消息窗口兼容性还需实机验证。
 
 ## GitHub Actions 构建
 
